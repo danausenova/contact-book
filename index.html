@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="title">
+        <h1>My contact book</h1>
+      </div>
+      <div class="addContact">
+        <h3>Add a new contact</h3>
+        <form class="addForm">
+          <input type="text" class="nameInp" placeholder="Enter first name" />
+          <input type="text" class="surnameInp" placeholder="Enter surname" />
+          <input
+            type="text"
+            class="phoneInp"
+            placeholder="Enter phone number"
+          />
+          <input type="url" class="imageInp" placeholder="Enter imageUrl" />
+          <button>Save</button>
+        </form>
+      </div>
+      <h3>My contacts</h3>
+      <div class="contacts-book"></div>
+
+      <div class="modal" id="edit-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Edit contact</h3>
+          </div>
+          <input type="text" id="edit-input-name" />
+          <input type="text" id="edit-input-surname" />
+          <input type="text" id="edit-input-phone" />
+          <input type="text" id="edit-input-img" />
+          <div class="modal-footer">
+            <button id="edit-cancel">Cancel</button>
+            <button class="edit-submit">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./js/main.js"></script>
+  </body>
+</html>
