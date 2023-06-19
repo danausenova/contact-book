@@ -13,12 +13,30 @@ const editImg = document.querySelector("#edit-input-img");
 const editCancel = document.querySelector("#edit-cancel");
 const editSubmit = document.querySelector(".edit-submit");
 
-let contactList = JSON.parse(localStorage.getItem("contact")) || [];
+const API = "http://localhost:8000/contacts";
+
+async function getContacts() {
+  const res = await fetch(API);
+  const data = await res.json();
+  return data;
+}
+
+async function addContact(contact) {
+  const res = await fetch(API, {
+    method: "POST",
+    body: JSON.stringify(contact),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 render();
 
-function render() {
+async function render() {
+  const contacts = await getContacts();
   contactBook.innerHTML = "";
-  contactList.forEach((item) => {
+  contacts.forEach((item) => {
     contactBook.innerHTML += `<div class="newContact">
         <img src="${item.image}" alt="">
         <span>${item.name}</span>
@@ -32,7 +50,7 @@ function render() {
   });
 }
 
-addForm.addEventListener("submit", (e) => {
+addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (
     !nameInp.value.trim() ||
@@ -43,14 +61,12 @@ addForm.addEventListener("submit", (e) => {
     return;
   }
   const contact = {
-    id: Date.now(),
     name: nameInp.value,
     surname: surnameInp.value,
     phone: phoneInp.value,
     image: imageInp.value,
   };
-  contactList.push(contact);
-  localStorage.setItem("contact", JSON.stringify(contactList));
+  await addContact(contact);
   nameInp.value = "";
   surnameInp.value = "";
   phoneInp.value = "";
@@ -58,24 +74,38 @@ addForm.addEventListener("submit", (e) => {
   render();
 });
 
-document.addEventListener("click", (e) => {
+async function deleteContact(id) {
+  console.log(id);
+  await fetch(`${API}/${id}`, {
+    method: "DELETE",
+  });
+}
+
+document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-btn")) {
-    contactList = contactList.filter((item) => item.id != e.target.id);
-    localStorage.setItem("contact", JSON.stringify(contactList));
+    console.log(e.target.id);
+    await deleteContact(e.target.id);
     render();
   }
 });
 
-document.addEventListener("click", (e) => {
+async function getOneTodo(id) {
+  const res = await fetch(`${API}/${id}`);
+  const data = await res.json();
+  return data;
+}
+let id = null;
+document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("edit-btn")) {
     editModal.style.visibility = "visible";
-    const contactToEdit = contactList.find((item) => item.id == e.target.id);
 
-    editName.value = contactToEdit.name;
-    editSurname.value = contactToEdit.surname;
-    editPhone.value = contactToEdit.phone;
-    editImg.value = contactToEdit.image;
-    editSubmit.id = e.target.id;
+    const todo = await getOneTodo(e.target.id);
+
+    id = e.target.id;
+    editName.value = todo.name;
+    editSurname.value = todo.surname;
+    editPhone.value = todo.phone;
+    editImg.value = todo.image;
   }
 });
 
@@ -83,7 +113,17 @@ editCancel.addEventListener("click", () => {
   editModal.style.visibility = "hidden";
 });
 
-editSubmit.addEventListener("click", (e) => {
+async function editContact(newData, id) {
+  await fetch(`${API}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(newData),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+editSubmit.addEventListener("click", async (e) => {
   if (
     !editName.value.trim() ||
     !editSurname.value.trim() ||
@@ -92,16 +132,14 @@ editSubmit.addEventListener("click", (e) => {
   ) {
     return;
   }
-  contactList = contactList.map((item) => {
-    if (item.id == editSubmit.id) {
-      item.name = editName.value;
-      item.surname = editSurname.value;
-      item.phone = editPhone.value;
-      item.image = editImg.value;
-    }
-    return item;
-  });
-  localStorage.setItem("contact", JSON.stringify(contactList));
+  const newContact = {
+    name: editName.value,
+    surname: editSurname.value,
+    phone: editPhone.value,
+    image: editImg.value,
+  };
+  await editContact(newContact, id);
+
   render();
   editCancel.click();
 });
